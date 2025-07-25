@@ -1,8 +1,8 @@
 <?php
-$host = 'db-xt32.cv06ouuo8e9n.ap-southeast-1.rds.amazonaws.com'; // Ganti dengan host Cloudflare Tunnel jika berbeda
-$user = 'userbook'; // Ganti dengan username database Anda
-$pass = 'userbook'; // Ganti dengan password database Anda
-$db   = 'Book_bers'; // Ganti dengan nama database Anda
+$host = 'db-xt32.cv06ouuo8e9n.ap-southeast-1.rds.amazonaws.com'; 
+$user = 'userbook'; 
+$pass = 'userbook'; 
+$db   = 'Book_bers'; 
 $port = 3306;
 
 
@@ -13,5 +13,5 @@ if ($conn->connect_error) {
 }
 echo 'Koneksi berhasil';
 
-$conn->close();
+//$conn->close();
 ?>
