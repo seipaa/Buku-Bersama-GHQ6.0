@@ -5,7 +5,26 @@ Platform berbagi materi pembelajaran yang menghubungkan mahasiswa dengan masyara
 
 ## Latar Belakang
 
-Kurangnya akses pendidikan berkualitas di Indonesia menjadi masalah utama. Hanya sebagian kecil masyarakat yang berkesempatan berkuliah, dan materi yang dipahami di perkuliahan masih di bawah 60%. Banyak mahasiswa kesulitan memahami materi karena tidak semua dosen menyediakan bahan ajar tertulis dan kurangnya platform terpusat antar prodi.
+Indonesia menghadapi tantangan besar dalam akses pendidikan tinggi. Hanya sebagian kecil masyarakat yang berkesempatan berkuliah, sementara kuliah masih dipandang tersier dan hanya untuk mereka yang mampu secara finansial. 
+
+### Masalah yang Dihadapi
+
+**Bagi Mahasiswa:**
+- Banyak mahasiswa kesulitan memahami materi perkuliahan karena tidak semua dosen menyediakan bahan ajar tertulis
+- Kurangnya platform terpusat antar program studi untuk berbagi materi
+- Mahasiswa baru sering kebingungan dalam orientasi akademik
+- Berdasarkan penelitian, materi yang dipahami di perkuliahan masih di bawah 60%
+
+**Bagi Masyarakat Umum:**
+- Tidak semua masyarakat dapat berkuliah karena keterbatasan finansial atau geografis
+- Masyarakat umum sulit mengakses pembelajaran tingkat kampus
+- Sumber belajar berkualitas tidak merata di seluruh Indonesia
+- Masih ada anggapan bahwa "kuliah hanya untuk yang mampu"
+
+**Dampak Sistemik:**
+- Kesenjangan pendidikan antar wilayah dan status ekonomi semakin melebar
+- Potensi sumber daya manusia tidak termanfaatkan optimal
+- Kurangnya budaya berbagi ilmu dan literasi digital
 
 ## Target User
 
