@@ -1,1 +1,0 @@
-export { DetailMateri } from "./DetailMateri";
