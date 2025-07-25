@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, BookOpenIcon, ChevronDownIcon, ChevronRightIcon, DownloadIcon, EyeIcon, FileTextIcon, MessageCircleIcon, SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Material } from "../../types";
 
@@ -7,6 +7,7 @@ interface DetailMateriProps {
   material: Material;
   onBack: () => void;
   onNavigateToReader?: (material: Material) => void;
+  selectedMaterialId?: string;
 }
 
 interface MaterialItem {
@@ -69,10 +70,11 @@ interface MaterialRating {
 }
 
 
-export const DetailMateri = ({ material, onBack, onNavigateToReader }: DetailMateriProps): JSX.Element => {
+export const DetailMateri = ({ material, onBack, onNavigateToReader, selectedMaterialId }: DetailMateriProps): JSX.Element => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeTab, setActiveTab] = useState<'course' | 'participants' | 'grades' | 'competencies'>('course');
+  const materialRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
 
   // Data semester 1-8 dengan materi yang relevan untuk Teknik Informatika
@@ -785,6 +787,22 @@ const getRatingDistribution = () => {
     )
   }));
 
+  useEffect(() => {
+    if (selectedMaterialId) {
+      // Cari semester yang mengandung materi ini
+      const semesterIdx = semesters.findIndex(sem => sem.materials.some(mat => mat.id === selectedMaterialId));
+      if (semesterIdx !== -1) {
+        setSemesters(prev => prev.map((sem, idx) => ({ ...sem, isExpanded: idx === semesterIdx })));
+        setTimeout(() => {
+          const el = materialRefs.current[selectedMaterialId];
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [selectedMaterialId]);
+
   return (
     <div className="bg-gradient-to-br from-gray-50 to-white min-h-screen">
       {/* Header */}
@@ -910,10 +928,10 @@ const getRatingDistribution = () => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 lg:mb-6 gap-3">
               <div>
                 <h1 className="font-['Poppins',Helvetica] font-bold text-gray-800 text-xl lg:text-2xl">
-                  {material.title}
+                  {material.author.programStudi}
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  {material.author.programStudi} - {material.author.universitas}
+                  {material.author.universitas}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -1000,101 +1018,111 @@ const getRatingDistribution = () => {
             {/* Course Tab Content */}
             {activeTab === 'course' && (
               <div className="space-y-3 lg:space-y-4">
-                {semesters.map((semester) => (
-                  <div key={semester.id} className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-                    {/* Semester Header */}
-                    <button
-                      onClick={() => toggleSemester(semester.id)}
-                      className="w-full flex items-center justify-between p-3 lg:p-4 text-left hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300 rounded-t-lg"
-                    >
-                      <div className="flex items-center">
-                        <span className="mr-3 text-gray-600 transition-transform duration-300">
-                          {semester.isExpanded ? (
-                            <ChevronDownIcon className="w-4 lg:w-5 h-4 lg:h-5" />
-                          ) : (
-                            <ChevronRightIcon className="w-4 lg:w-5 h-4 lg:h-5" />
-                          )}
-                        </span>
-                        <h3 className="font-['Poppins',Helvetica] font-semibold text-gray-800 text-sm lg:text-lg">
-                          {semester.title}
-                        </h3>
-                        <span className="ml-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                          {semester.materials.length} materi
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Avg: ★{semester.materials.length > 0 ? 
-                          (semester.materials.reduce((sum, mat) => sum + mat.rating, 0) / semester.materials.length).toFixed(1) : 
-                          '0.0'
-                        }
-                      </div>
-                    </button>
-                      
-                    {/* Semester Content */}
-                    {semester.isExpanded && (
-                      <div className="px-3 lg:px-4 pb-3 lg:pb-4">
-                        {semester.materials.length > 0 ? (
-                          <div className="space-y-2">
-                            {semester.materials.map((material) => (
-                              <div
-                                key={material.id}
-                                className="flex items-center p-2 lg:p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg hover:from-blue-50 hover:to-blue-100 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-md group"
-                                onClick={() => handleMaterialClick(material)}
-                              >
-                                <div className="mr-2 lg:mr-3">
-                                  {getTypeIcon(material.type)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-['Poppins',Helvetica] font-medium text-xs lg:text-sm text-gray-800 group-hover:text-blueprime transition-colors duration-300 truncate">
-                                    {material.title}
-                                  </div>
-                                  <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 transition-colors duration-300">
-                                    {material.description}
-                                  </div>
-                                  <div className="flex items-center space-x-2 mt-1">
-                                    <span className="text-xs text-gray-500">by {material.author}</span>
-                                    <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-gray-500">{material.downloadCount} downloads</span>
-                                    <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-yellow-600">★{material.rating}</span>
-                                  </div>
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {material.tags.slice(0, 3).map((tag, index) => (
-                                      <span
-                                        key={index}
-                                        className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full"
-                                      >
-                                        #{tag}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex items-center space-x-1 lg:space-x-2">
-                                  <Button className="p-1 bg-transparent hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:scale-110">
-                                    <EyeIcon className="w-3 lg:w-4 h-3 lg:h-4" />
-                                  </Button>
-                                  <Button className="p-1 bg-transparent hover:bg-green-100 text-green-600 transition-all duration-300 hover:scale-110">
-                                    <DownloadIcon className="w-3 lg:w-4 h-3 lg:h-4" />
-                                  </Button>
-                                  <Button className="p-1 bg-transparent hover:bg-purple-100 text-purple-600 transition-all duration-300 hover:scale-110">
-                                    <MessageCircleIcon className="w-3 lg:w-4 h-3 lg:h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-6 lg:py-8">
-                            <div className="text-gray-400 text-2xl lg:text-4xl mb-2">📚</div>
-                            <p className="text-gray-500 text-xs lg:text-sm italic">
-                              Belum ada materi untuk semester ini
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                {semesters.every(sem => sem.materials.length === 0) ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 text-6xl mb-4">📚</div>
+                    <h3 className="text-xl font-semibold text-gray-600 mb-2">Materi tidak tersedia</h3>
+                    <p className="text-gray-500 mb-6">Belum ada materi untuk prodi/universitas ini</p>
                   </div>
-                ))}
+                ) : (
+                  semesters.map((semester) => (
+                    <div key={semester.id} className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+                      {/* Semester Header */}
+                      <button
+                        onClick={() => toggleSemester(semester.id)}
+                        className="w-full flex items-center justify-between p-3 lg:p-4 text-left hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300 rounded-t-lg"
+                      >
+                        <div className="flex items-center">
+                          <span className="mr-3 text-gray-600 transition-transform duration-300">
+                            {semester.isExpanded ? (
+                              <ChevronDownIcon className="w-4 lg:w-5 h-4 lg:h-5" />
+                            ) : (
+                              <ChevronRightIcon className="w-4 lg:w-5 h-4 lg:h-5" />
+                            )}
+                          </span>
+                          <h3 className="font-['Poppins',Helvetica] font-semibold text-gray-800 text-sm lg:text-lg">
+                            {semester.title}
+                          </h3>
+                          <span className="ml-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            {semester.materials.length} materi
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Avg: ★{semester.materials.length > 0 ? 
+                            (semester.materials.reduce((sum, mat) => sum + mat.rating, 0) / semester.materials.length).toFixed(1) : 
+                            '0.0'
+                          }
+                        </div>
+                      </button>
+                          
+                      {/* Semester Content */}
+                      {semester.isExpanded && (
+                        <div className="px-3 lg:px-4 pb-3 lg:pb-4">
+                          {semester.isExpanded && semester.materials.length > 0 ? (
+                            <div className="space-y-2">
+                              {semester.materials.map((material) => (
+                                <div
+                                  key={material.id}
+                                  ref={el => { if (selectedMaterialId) materialRefs.current[material.id] = el; }}
+                                  className={`flex items-center p-2 lg:p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg hover:from-blue-50 hover:to-blue-100 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-md group
+                                  ${selectedMaterialId === material.id ? 'ring-2 ring-blueprime bg-blue-100' : ''}`}
+                                  onClick={() => handleMaterialClick(material)}
+                                >
+                                  <div className="mr-2 lg:mr-3">
+                                    {getTypeIcon(material.type)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-['Poppins',Helvetica] font-medium text-xs lg:text-sm text-gray-800 group-hover:text-blueprime transition-colors duration-300 truncate">
+                                      {material.title}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 transition-colors duration-300">
+                                      {material.description}
+                                    </div>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className="text-xs text-gray-500">by {material.author}</span>
+                                      <span className="text-xs text-gray-400">•</span>
+                                      <span className="text-xs text-gray-500">{material.downloadCount} downloads</span>
+                                      <span className="text-xs text-gray-400">•</span>
+                                      <span className="text-xs text-yellow-600">★{material.rating}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {material.tags.slice(0, 3).map((tag, index) => (
+                                        <span
+                                          key={index}
+                                          className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full"
+                                        >
+                                          #{tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-1 lg:space-x-2">
+                                    <Button className="p-1 bg-transparent hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:scale-110">
+                                      <EyeIcon className="w-3 lg:w-4 h-3 lg:h-4" />
+                                    </Button>
+                                    <Button className="p-1 bg-transparent hover:bg-green-100 text-green-600 transition-all duration-300 hover:scale-110">
+                                      <DownloadIcon className="w-3 lg:w-4 h-3 lg:h-4" />
+                                    </Button>
+                                    <Button className="p-1 bg-transparent hover:bg-purple-100 text-purple-600 transition-all duration-300 hover:scale-110">
+                                      <MessageCircleIcon className="w-3 lg:w-4 h-3 lg:h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-6 lg:py-8">
+                              <div className="text-gray-400 text-2xl lg:text-4xl mb-2">📚</div>
+                              <p className="text-gray-500 text-xs lg:text-sm italic">
+                                Belum ada materi untuk semester ini
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             )}
             {activeTab === 'participants' && (

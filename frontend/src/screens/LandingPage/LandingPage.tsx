@@ -7,24 +7,32 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
-import { mockMaterials, studyFields } from '../../data/mockData';
-import { Material, StudyField } from '../../types';
+import { mockMaterials, studyFields, universities } from '../../data/mockData';
+import { Faculty, Material, StudyField, StudyProgram } from '../../types';
 
 interface LandingPageProps {
   onNavigateToDetail?: (material: Material) => void;
   onNavigateToLogin?: () => void;
   onNavigateToRegister?: () => void;
+  onNavigateToUniversity?: (university: any) => void;
+  onNavigateToProdi?: (prodi: any, faculty: any, university: any) => void;
 }
 
 export const LandingPage = ({
   onNavigateToDetail,
   onNavigateToLogin,
   onNavigateToRegister,
+  onNavigateToUniversity,
+  onNavigateToProdi,
 }: LandingPageProps): JSX.Element => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedField, setSelectedField] = useState<StudyField | 'All'>('All');
   const [sortBy, setSortBy] = useState('latest');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchMode, setSearchMode] = useState<'materi' | 'univ' | 'prodi'>('materi');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedUniversity, setSelectedUniversity] = useState<any | null>(null);
+  const [selectedProdi, setSelectedProdi] = useState<any | null>(null);
 
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -34,6 +42,49 @@ export const LandingPage = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Handle search logic
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setSearchMode('materi');
+      setSearchResults([]);
+      setSelectedUniversity(null);
+      setSelectedProdi(null);
+      return;
+    }
+    // Cari universitas
+    const univResults = universities.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (univResults.length > 0) {
+      setSearchMode('univ');
+      setSearchResults(univResults);
+      setSelectedUniversity(null);
+      setSelectedProdi(null);
+      return;
+    }
+    // Cari prodi di semua universitas
+    let prodiResults: any[] = [];
+    for (const u of universities) {
+      for (const f of u.faculties as Faculty[]) {
+        for (const p of f.programs as StudyProgram[]) {
+          if (p.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+            prodiResults.push({ ...p, university: u, faculty: f });
+          }
+        }
+      }
+    }
+    if (prodiResults.length > 0) {
+      setSearchMode('prodi');
+      setSearchResults(prodiResults);
+      setSelectedUniversity(null);
+      setSelectedProdi(null);
+      return;
+    }
+    // Default: materi
+    setSearchMode('materi');
+    setSearchResults([]);
+    setSelectedUniversity(null);
+    setSelectedProdi(null);
+  }, [searchTerm]);
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
@@ -215,10 +266,10 @@ export const LandingPage = ({
                 <span className="font-bold"> BukuBersama</span>
               </h2>
               <Separator className="w-[150px] lg:w-[200px] h-[2px] mb-6 lg:mb-8 bg-gradient-to-r from-blueprime to-blue-400 animate-fade-in mx-auto lg:mx-0" />
-              <p className="font-['Poppins',Helvetica] font-normal text-blueprime text-base lg:text-lg leading-relaxed animate-fade-in">
-                Platform edukasi yang memungkinkan mahasiswa berbagi materi kuliah 
-                dari 8 semester perkuliahan mereka. Setiap semester memiliki 5 materi 
-                utama yang dapat diakses oleh masyarakat umum secara gratis.
+              <p className="font-['Poppins',Helvetica] font-normal text-blueprime text-base lg:text-lg leading-relaxed animate-fade-in text-justify max-w-4xl mx-auto">
+                <span className="block mb-2">BukuBersama adalah inovasi nyata untuk masa depan pendidikan Indonesia. Kami hadir untuk membuka akses pendidikan tinggi bagi seluruh masyarakat, tanpa batasan wilayah maupun status ekonomi.</span>
+                <span className="block mb-2">Dengan menghubungkan mahasiswa dari berbagai kampus dengan masyarakat luas, BukuBersama mendorong budaya berbagi ilmu, memperkuat literasi digital, dan memperkecil kesenjangan pendidikan antar wilayah dan status ekonomi.</span>
+                <span className="block mb-2">Setiap materi yang dibagikan adalah kontribusi nyata untuk kemajuan bersama, memberikan dampak positif dan solusi nyata bagi tantangan pendidikan Indonesia di era digital.</span>
               </p>
             </div>
           </div>
@@ -236,7 +287,7 @@ export const LandingPage = ({
               </div>
               <div className="bg-white rounded-lg p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <UsersIcon className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                <div className="text-2xl font-bold text-gray-800">2</div>
+                <div className="text-2xl font-bold text-gray-800">20</div>
                 <div className="text-sm text-gray-600">Kontributor</div>
               </div>
               <div className="bg-white rounded-lg p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -264,7 +315,6 @@ export const LandingPage = ({
               </h2>
             </div>
           </div>
-
           {/* Search and Filter Bar */}
           <div className="max-w-7xl mx-auto mb-6 lg:mb-8 px-4 lg:px-6">
             <div className="flex flex-col sm:flex-row items-center gap-3 lg:gap-4 bg-white p-3 lg:p-4 rounded-lg shadow-lg border border-gray-200">
@@ -284,7 +334,7 @@ export const LandingPage = ({
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Cari materi kuliah..."
+                  placeholder="Cari materi, universitas, atau prodi..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-xs lg:text-sm focus:outline-none focus:ring-2 focus:ring-blueprime transition-all duration-300 hover:border-blueprime"
                 />
               </div>
@@ -299,11 +349,59 @@ export const LandingPage = ({
               </select>
             </div>
           </div>
-
-          {/* Materials Grid */}
+          {/* Dynamic Search Result Section */}
           <div className="max-w-7xl mx-auto px-4 lg:px-6">
+            {searchMode === 'univ' && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">Universitas Ditemukan:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {searchResults.map((u: any) => (
+                    <Card key={u.id} className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-blue-50 to-white border border-blueprime/20 rounded-xl group" onClick={() => { if (onNavigateToUniversity) { onNavigateToUniversity(u); } else { setSelectedUniversity(u); setSearchMode('prodi'); setSearchResults(u.faculties.flatMap((f: Faculty) => f.programs.map((p: StudyProgram) => ({ ...p, university: u, faculty: f })))); } }}>
+                      <CardContent className="p-0 flex flex-col items-center text-center py-6 px-4">
+                        {/* Logo Avatar */}
+                        <div className="w-14 h-14 rounded-full bg-blueprime/10 flex items-center justify-center mb-3 border-2 border-blueprime/30 group-hover:scale-110 transition-transform">
+                          <span className="text-2xl font-bold text-blueprime">{u.name.split(' ').map((w: string) => w[0]).join('')}</span>
+                        </div>
+                        <h4 className="font-bold text-blueprime text-lg mb-1 group-hover:text-blue-700 transition-colors">{u.name}</h4>
+                        <div className="text-xs text-gray-600 mb-1 flex items-center justify-center gap-1">
+                          <svg className="w-4 h-4 text-blueprime/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                          {u.location}
+                        </div>
+                        <div className="text-xs font-semibold text-white bg-blueprime/80 px-3 py-1 rounded-full inline-block mb-2 mt-1 shadow">{u.type === 'negeri' ? 'Negeri' : 'Swasta'}</div>
+                        <div className="text-xs text-gray-500">{u.faculties.length} Fakultas</div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            {searchMode === 'prodi' && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">Program Studi Ditemukan:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {searchResults.map((p: any) => (
+                    <Card key={p.id} className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-yellow-50 to-white border border-yellow-400/20 rounded-xl group" onClick={() => { if (onNavigateToProdi) { onNavigateToProdi(p, p.faculty, p.university); } else { setSelectedProdi(p); setSearchMode('materi'); } }}>
+                      <CardContent className="p-0 flex flex-col items-center text-center py-6 px-4">
+                        {/* Prodi Avatar */}
+                        <div className="w-14 h-14 rounded-full bg-yellow-400/10 flex items-center justify-center mb-3 border-2 border-yellow-400/30 group-hover:scale-110 transition-transform">
+                          <span className="text-xl font-bold text-yellow-700">{p.name.split(' ').map((w: string) => w[0]).join('')}</span>
+                        </div>
+                        <h4 className="font-bold text-yellow-700 text-lg mb-1 group-hover:text-yellow-900 transition-colors">{p.name}</h4>
+                        <div className="text-xs text-gray-600 mb-1">{p.university.name} - {p.faculty.name}</div>
+                        <div className="text-xs font-semibold text-white bg-yellow-400/80 px-3 py-1 rounded-full inline-block mb-2 mt-1 shadow">{p.degree} - {p.field}</div>
+                        <div className="text-xs text-gray-500">{p.description}</div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Materials Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedMaterials.map((material) => (
+              {(selectedProdi
+                ? sortedMaterials.filter(m => m.programStudiId === selectedProdi.id)
+                : sortedMaterials
+              ).map((material) => (
                 <Card
                   key={material.id}
                   className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 bg-white border border-gray-200 rounded-lg overflow-hidden group"
@@ -409,9 +507,11 @@ export const LandingPage = ({
                 </Card>
               ))}
             </div>
-            
             {/* No results message */}
-            {sortedMaterials.length === 0 && (
+            {(selectedProdi
+              ? sortedMaterials.filter(m => m.programStudiId === selectedProdi.id).length === 0
+              : sortedMaterials.length === 0
+            ) && (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">📚</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Tidak ada materi ditemukan</h3>
