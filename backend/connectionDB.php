@@ -1,7 +1,7 @@
 <?php
-$host = 'db-xt32.cv06ouuo8e9n.ap-southeast-1.rds.amazonaws.com'; 
-$user = 'userbook'; 
-$pass = 'userbook'; 
+$host = '127.0.0.1'; 
+$user = 'root'; 
+$pass = 'root'; 
 $db   = 'Book_bers'; 
 $port = 3306;
 
