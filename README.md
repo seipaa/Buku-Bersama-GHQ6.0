@@ -76,6 +76,10 @@ npm run dev
 ## Tim
 
 **Team Langsung Saja** - 4 anggota
+1. Hafizh 'Abid Khalish - FE
+2. Ihsan Defriyadi - BE
+3. Fauzan Fuadiansyah - UI/UX, Video Editor
+4. Andre Saputra - Video Pitcher, Content Creator at Canva
 
 Dikembangkan untuk **Garuda Hacks 6.0** dengan tema **Education & Equality**
 
